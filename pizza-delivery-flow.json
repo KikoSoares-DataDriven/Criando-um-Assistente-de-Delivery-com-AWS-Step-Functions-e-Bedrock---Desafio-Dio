@@ -1,0 +1,135 @@
+{
+  "Comment": "Fluxo de Pedido de Pizza - Pizzaria AWS",
+  "StartAt": "ReceberPedidoPizza",
+  "States": {
+    "ReceberPedidoPizza": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:receberPedidoPizza",
+      "Parameters": {
+        "cliente.$": "$.cliente",
+        "pedido": {
+          "tamanho.$": "$.tamanho",
+          "sabores.$": "$.sabores",
+          "bordaRecheada.$": "$.bordaRecheada",
+          "extras.$": "$.extras",
+          "bebidas.$": "$.bebidas"
+        }
+      },
+      "Next": "VerificarDisponibilidade"
+    },
+    "VerificarDisponibilidade": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:verificarDisponibilidade",
+      "Parameters": {
+        "ingredientes.$": "$.pedido.sabores",
+        "extras.$": "$.pedido.extras"
+      },
+      "Next": "ValidarPedido"
+    },
+    "ValidarPedido": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.disponivel",
+          "BooleanEquals": true,
+          "Next": "CalcularTempoPreparo"
+        }
+      ],
+      "Default": "NotificarIndisponibilidade"
+    },
+    "CalcularTempoPreparo": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:calcularTempoPreparo",
+      "Parameters": {
+        "numeroPedidos.$": "$.pedidosNaFila",
+        "sabores.$": "$.pedido.sabores",
+        "extras.$": "$.pedido.extras"
+      },
+      "Next": "ProcessarPagamento"
+    },
+    "ProcessarPagamento": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:processarPagamento",
+      "Parameters": {
+        "valor.$": "$.valorTotal",
+        "metodoPagamento.$": "$.metodoPagamento",
+        "cupom.$": "$.cupom"
+      },
+      "Next": "EnviarParaCozinha"
+    },
+    "EnviarParaCozinha": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:enviarParaCozinha",
+      "Parameters": {
+        "pedidoId.$": "$.pedidoId",
+        "detalhes.$": "$.pedido",
+        "prioridade.$": "$.prioridade"
+      },
+      "Next": "MonitorarPreparoPizza"
+    },
+    "MonitorarPreparoPizza": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:monitorarPreparoPizza",
+      "Parameters": {
+        "pedidoId.$": "$.pedidoId",
+        "etapas": [
+          "massaAberta",
+          "recheioAplicado",
+          "assando",
+          "finalizando"
+        ]
+      },
+      "Next": "ControleQualidade"
+    },
+    "ControleQualidade": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:controleQualidade",
+      "Parameters": {
+        "pedidoId.$": "$.pedidoId",
+        "temperatura.$": "$.temperatura",
+        "aspectoVisual.$": "$.aspectoVisual"
+      },
+      "Next": "AtribuirEntregador"
+    },
+    "AtribuirEntregador": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:atribuirEntregador",
+      "Parameters": {
+        "pedidoId.$": "$.pedidoId",
+        "enderecoEntrega.$": "$.enderecoEntrega",
+        "rotaOtimizada.$": "$.rota"
+      },
+      "Next": "MonitorarEntrega"
+    },
+    "MonitorarEntrega": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:monitorarEntrega",
+      "Parameters": {
+        "pedidoId.$": "$.pedidoId",
+        "entregadorId.$": "$.entregadorId",
+        "previsaoEntrega.$": "$.previsaoEntrega"
+      },
+      "Next": "FinalizarPedido"
+    },
+    "FinalizarPedido": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:finalizarPedido",
+      "Parameters": {
+        "pedidoId.$": "$.pedidoId",
+        "avaliacaoCliente.$": "$.avaliacao",
+        "tempoTotal.$": "$.tempoTotal"
+      },
+      "End": true
+    },
+    "NotificarIndisponibilidade": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT:function:notificarIndisponibilidade",
+      "Parameters": {
+        "cliente.$": "$.cliente",
+        "itensFaltantes.$": "$.itensFaltantes",
+        "sugestoesAlternativas.$": "$.sugestoes"
+      },
+      "End": true
+    }
+  }
+}

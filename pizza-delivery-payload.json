@@ -1,0 +1,51 @@
+{
+  "cliente": {
+    "id": "12345",
+    "nome": "João Silva",
+    "telefone": "+55 11 99999-9999",
+    "enderecoEntrega": {
+      "rua": "Rua das Pizzas, 123",
+      "bairro": "Centro",
+      "cidade": "São Paulo",
+      "complemento": "Apto 42",
+      "pontoReferencia": "Próximo à padaria"
+    }
+  },
+  "pedido": {
+    "tamanho": "grande",
+    "sabores": [
+      {
+        "sabor": "Margherita",
+        "metade": "inteira"
+      }
+    ],
+    "bordaRecheada": {
+      "sabor": "catupiry",
+      "valor": 8.00
+    },
+    "extras": [
+      {
+        "item": "oregano",
+        "valor": 0.00
+      },
+      {
+        "item": "parmesao_extra",
+        "valor": 5.00
+      }
+    ],
+    "bebidas": [
+      {
+        "item": "refrigerante_2l",
+        "sabor": "cola",
+        "valor": 12.00
+      }
+    ]
+  },
+  "metodoPagamento": {
+    "tipo": "cartao_credito",
+    "ultimos4Digitos": "1234",
+    "parcelas": 1
+  },
+  "cupom": "PIZZA10",
+  "valorTotal": 89.90
+}
